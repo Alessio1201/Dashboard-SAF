@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eSAF – Modello Tecno-Economico Interattivo</title>
+<!-- Libreria grafici Plotly, incorporata direttamente nel file (nessuna connessione a internet necessaria) -->
+<script>__PLOTLY_JS__</script>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#161d27; --panel2:#1c2531; --border:#2a3444;
+    --text:#e8edf3; --text-dim:#93a2b8; --accent:#3ba6ff; --accent2:#5ee0b5;
+    --fossil:#9aa4b2; --ets:#4caf50; --red:#e05252; --refuel:#3b82f6;
+    --good:#5ee0b5; --bad:#ff6b6b; --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;
+  }
+  header{
+    padding:20px 28px 16px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#131922,#0f1419);
+  }
+  .brandRow{display:flex; align-items:center; gap:18px; margin-bottom:12px; flex-wrap:wrap;}
+  .brandLogos{display:flex; align-items:center; gap:24px; background:#fff; border-radius:10px; padding:10px 18px;}
+  .brandLogos .logo{height:56px; width:auto; display:block;}
+  .brandText{font-size:11.5px; color:var(--text-dim);}
+  .brandText span{color:var(--text); font-weight:600;}
+  header h1{margin:0 0 4px; font-size:20px; font-weight:650; letter-spacing:.2px;}
+  header p{margin:0 0 4px; color:var(--text-dim); font-size:13px; line-height:1.5; max-width:900px;}
+  header p.ref{font-size:11.5px; color:var(--text-dim); opacity:.85;}
+  header p.ref a{color:var(--accent);}
+  .layout{display:flex; align-items:flex-start; gap:0;}
+  aside{
+    width:310px; min-width:310px; padding:18px 18px 40px; border-right:1px solid var(--border);
+    height:calc(100vh - 92px); overflow-y:auto; position:sticky; top:0;
+  }
+  main{flex:1; padding:18px 24px 40px; min-width:0;}
+  .group{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; margin-bottom:14px;
+  }
+  .group h3{
+    margin:0 0 12px; font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--text-dim); font-weight:650;
+  }
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px; color:var(--text);}
+  .field label span.val{color:var(--accent); font-variant-numeric:tabular-nums; font-weight:600;}
+  input[type=range]{ width:100%; accent-color:var(--accent); height:4px; cursor:pointer; }
+  .segmented{display:flex; gap:6px;}
+  .segmented button{
+    flex:1; background:var(--panel2); border:1px solid var(--border); color:var(--text-dim);
+    padding:7px 4px; border-radius:6px; cursor:pointer; font-size:12.5px; transition:.15s;
+  }
+  .segmented button.active{background:var(--accent); border-color:var(--accent); color:#08131f; font-weight:650;}
+  button.reset{
+    width:100%; padding:9px; background:transparent; border:1px solid var(--border); color:var(--text-dim);
+    border-radius:6px; cursor:pointer; font-size:12.5px; margin-top:4px;
+  }
+  button.reset:hover{border-color:var(--accent); color:var(--accent);}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px; margin-bottom:18px;}
+  .kpi{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:13px 14px;}
+  .kpi .lbl{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;}
+  .kpi .num{font-size:19px; font-weight:650; font-variant-numeric:tabular-nums;}
+  .kpi .num.good{color:var(--good);}
+  .kpi .num.bad{color:var(--bad);}
+  .kpi .sub{font-size:11px; color:var(--text-dim); margin-top:3px;}
+  .kpi.hero{border-color:rgba(59,166,255,.5); background:linear-gradient(180deg,rgba(59,166,255,.10),var(--panel));}
+  .charts{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px 6px;}
+  .card h3{margin:0 0 2px; font-size:13.5px; font-weight:650;}
+  .card .note{font-size:11px; color:var(--text-dim); margin-bottom:6px;}
+  .plot{width:100%; height:340px;}
+  #chartCOP, #chartPrice{height:460px;}
+  .full{grid-column:1 / -1;}
+  .badge{
+    display:inline-block; font-size:10px; padding:2px 7px; border-radius:20px; margin-left:8px;
+    vertical-align:middle; font-weight:600; letter-spacing:.02em;
+  }
+  .badge.live{background:rgba(94,224,181,.15); color:var(--good); border:1px solid rgba(94,224,181,.35);}
+  .advgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;}
+  .advgrid .f{display:flex; flex-direction:column; gap:4px;}
+  .advgrid .f label{font-size:10.5px; color:var(--text-dim); line-height:1.25;}
+  .advgrid .f input[type=number]{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:6px; padding:5px 6px; font-size:12.5px; width:100%;
+  }
+  details{margin-top:6px;}
+  details summary{
+    cursor:pointer; font-size:11.5px; color:var(--accent); list-style:none; user-select:none;
+    display:flex; align-items:center; gap:4px;
+  }
+  details summary::-webkit-details-marker{display:none;}
+  details summary::before{content:'▸'; font-size:10px; transition:.15s;}
+  details[open] summary::before{transform:rotate(90deg);}
+  details .advgrid{margin-top:10px;}
+  .infoline{
+    display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-dim);
+    background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px 10px; margin-top:2px;
+  }
+  .infoline b{color:var(--text); font-variant-numeric:tabular-nums;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+  @media (max-width:1100px){ .charts{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandRow">
+    <div class="brandLogos">
+      <!-- Loghi caricati da file esterni: metti i due file immagine in una cartella chiamata
+           "loghi" accanto a questo file .html, con questi nomi esatti:
+             loghi/politecnico-torino.png
+             loghi/sarpom.png
+           Finché i file non ci sono, il logo semplicemente non compare (nessuna icona rotta). -->
+      <img class="logo" src="loghi/politecnico-torino.png" alt="Politecnico di Torino"
+           onerror="this.style.display='none'">
+      <img class="logo" src="loghi/sarpom.png" alt="Sarpom Srl"
+           onerror="this.style.display='none'">
+    </div>
+    <div class="brandText">Modello sviluppato da Politecnico di Torino e Sarpom Srl — <span>Alessio Tauro</span></div>
+  </div>
+  <h1>eSAF – Modello Tecno-Economico Interattivo</h1>
+  <p>Modifica i parametri a sinistra per ricalcolare in tempo reale il <b>prezzo di break-even del kerosene</b>, il cash flow scontato e il prezzo medio del SAF secondo il mandato ReFuelEU.</p>
+  <p class="ref">Impianto Power-to-Liquid Fischer-Tropsch (elettrolizzatore + sintesi FT). Bilanci di materia ed energia da S. Bube et al., <i>Kerosene production from power-based syngas</i>, Fuel 366 (2024), <a href="https://doi.org/10.1016/J.FUEL.2024.131269" target="_blank" rel="noopener">doi.org/10.1016/J.FUEL.2024.131269</a></p>
+</header>
+
+<div class="layout">
+  <aside>
+
+    <div class="group">
+      <h3>Elettrolizzatore</h3>
+      <div class="field">
+        <label>Tecnologia</label>
+        <div class="segmented" id="weType">
+          <button data-v="AEL">AEL</button>
+          <button data-v="PEM" class="active">PEM</button>
+          <button data-v="SOE">SOE</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Taglia elettrolizzatore <span class="val" id="v_power_mw">350 MW</span></label>
+        <input type="range" id="power_mw" min="50" max="800" step="10" value="350">
+      </div>
+      <div class="field">
+        <label>Ore di funzionamento/anno <span class="val" id="v_hours">8000 h</span></label>
+        <input type="range" id="hours" min="4000" max="8600" step="100" value="8000">
+      </div>
+      <details open>
+        <summary>Dati tecnici elettrolizzatore</summary>
+        <div class="advgrid">
+          <div class="f"><label>CAPEX (€/kW)</label><input type="number" id="we_capex" step="10"></div>
+          <div class="f"><label>Consumo energia (kWh/kg)</label><input type="number" id="we_econs" step="0.1"></div>
+          <div class="f"><label>Durata stack (h)</label><input type="number" id="we_dur" step="1000"></div>
+          <div class="f"><label>Degradazione stack (%/1000h)</label><input type="number" id="we_degr" step="0.01"></div>
+          <div class="f"><label>Costo sostituzione stack (% CAPEX)</label><input type="number" id="we_srcost" step="1"></div>
+          <div class="f"><label>OPEX (% CAPEX)</label><input type="number" id="we_opex" step="0.5"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="group">
+      <h3>Economia del progetto</h3>
+      <div class="field">
+        <label>Return on Equity (ROE) <span class="val" id="v_roe">15 %</span></label>
+        <input type="range" id="roe" min="0" max="40" step="0.5" value="15">
+      </div>
+      <div class="field">
+        <label>Quota debito <span class="val" id="v_x_d">70 %</span></label>
+        <input type="range" id="x_d" min="0" max="100" step="1" value="70">
+      </div>
+      <div class="field">
+        <label>Tasso interesse debito <span class="val" id="v_dr">4 %</span></label>
+        <input type="range" id="dr" min="0" max="15" step="0.25" value="4">
+      </div>
+      <div class="field">
+        <label>Tax rate <span class="val" id="v_tax">29 %</span></label>
+        <input type="range" id="tax" min="0" max="50" step="1" value="29">
+      </div>
+      <div class="field">
+        <label>Inflazione <span class="val" id="v_infl">2 %</span></label>
+        <input type="range" id="infl" min="0" max="10" step="0.25" value="2">
+      </div>
+      <div class="infoline"><span>WACC → tasso di sconto (DF)</span><b id="v_waccdf">6.49% → 8.62%</b></div>
+    </div>
+
+    <div class="group">
+      <h3>Prezzi &amp; commodities</h3>
+      <div class="field">
+        <label>Prezzo energia elettrica <span class="val" id="v_ee">107.2 €/MWh</span></label>
+        <input type="range" id="ee" min="30" max="300" step="1" value="107.2">
+      </div>
+      <div class="field">
+        <label>Costo CO2 capture <span class="val" id="v_cc">100 €/t</span></label>
+        <input type="range" id="cc" min="0" max="300" step="5" value="100">
+      </div>
+      <div class="field">
+        <label>Brent <span class="val" id="v_brent">76.8 $/bbl</span></label>
+        <input type="range" id="brent" min="20" max="180" step="1" value="76.794">
+      </div>
+      <div class="field">
+        <label>Tasso di cambio <span class="val" id="v_cambio">0.950 €/$</span></label>
+        <input type="range" id="cambio" min="0.7" max="1.2" step="0.005" value="0.95">
+      </div>
+      <div class="field">
+        <label>ETS1 (Jet/Marine) <span class="val" id="v_ets1">100 €/t CO2</span></label>
+        <input type="range" id="ets1" min="0" max="300" step="5" value="100">
+      </div>
+      <div class="field">
+        <label>ETS2 (Auto) <span class="val" id="v_ets2">50 €/t CO2</span></label>
+        <input type="range" id="ets2" min="0" max="300" step="5" value="50">
+      </div>
+      <div class="field">
+        <label>Differenziale Nafta <span class="val" id="v_diff_nafta">0.0 $/bbl</span></label>
+        <input type="range" id="diff_nafta" min="-50" max="50" step="0.5" value="0">
+      </div>
+      <div class="field">
+        <label>Differenziale Kerosene <span class="val" id="v_diff_kero">17.0 $/bbl</span></label>
+        <input type="range" id="diff_kero" min="-50" max="50" step="0.5" value="17">
+      </div>
+      <div class="field">
+        <label>Differenziale Diesel <span class="val" id="v_diff_diesel">21.5 $/bbl</span></label>
+        <input type="range" id="diff_diesel" min="-50" max="50" step="0.5" value="21.5">
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Prezzo ReFuel del kerosene</h3>
+      <div class="field">
+        <label>Modalità di calcolo</label>
+        <div class="segmented" id="calcMode">
+          <button data-v="bep" class="active" title="Trova il ReFuel che azzera il VAN, al tasso di sconto impostato">BEP automatico</button>
+          <button data-v="irr" title="Trova il tasso di sconto (IRR) che azzera il VAN, al ReFuel impostato qui sotto">IRR a ReFuel fisso</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>ReFuel <span class="val" id="v_refuel">1118 €/t</span></label>
+        <input type="range" id="refuel" min="0" max="6000" step="10" value="1118" disabled>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Mandato ReFuelEU – prezzo del SAF</h3>
+      <div class="field">
+        <label>Prezzo carburante fossile <span class="val" id="v_fossil_price">900 €/t</span></label>
+        <input type="range" id="fossil_price" min="300" max="2000" step="10" value="900">
+      </div>
+      <div class="field">
+        <label>Prezzo bio-SAF (HEFA) <span class="val" id="v_hefa_price">2200 €/t</span></label>
+        <input type="range" id="hefa_price" min="1000" max="4000" step="50" value="2200">
+      </div>
+      <div class="infoline"><span>Prezzo e-SAF</span><b id="v_esaf_price">–</b></div>
+    </div>
+
+    <button class="reset" id="resetBtn">↺ Ripristina valori di base</button>
+  </aside>
+
+  <main>
+    <div class="kpis">
+      <div class="kpi hero"><div class="lbl">Prezzo kerosene (totale)</div><div class="num" id="k_kerobep">–</div><div class="sub">€/ton, Fossile+ETS+Quota RED+ReFuel</div></div>
+      <div class="kpi"><div class="lbl" id="k_refuel_lbl">ReFuel break-even</div><div class="num" id="k_bep">–</div><div class="sub" id="k_refuel_sub">€/ton, sola componente ReFuel</div></div>
+      <div class="kpi"><div class="lbl" id="k_result_lbl">VAN a fine progetto</div><div class="num" id="k_result">–</div><div class="sub" id="k_result_sub">k€, cash flow scontato cumulato</div></div>
+      <div class="kpi"><div class="lbl">LCOH idrogeno</div><div class="num" id="k_lcoh">–</div><div class="sub">€/kg H₂</div></div>
+      <div class="kpi"><div class="lbl">Produttività e-fuels</div><div class="num" id="k_prod">–</div><div class="sub" id="k_prod_sub">kt/anno</div></div>
+      <div class="kpi"><div class="lbl">CAPEX totale impianto</div><div class="num" id="k_capex">–</div><div class="sub" id="k_capex_sub">M€</div></div>
+    </div>
+
+    <div class="charts">
+      <div class="card">
+        <h3>Prezzo di mercato del kerosene, nafta e diesel <span class="badge live">live</span></h3>
+        <div class="note">Composizione del prezzo €/ton: quota fossile, ETS, quota RED, ReFuel (solo kerosene)</div>
+        <div class="plot" id="chartPrice"></div>
+      </div>
+      <div class="card">
+        <h3>Composizione del costo di produzione degli e-fuels <span class="badge live">live</span></h3>
+        <div class="note">Break-down del costo di produzione (€/ton e-fuel, normalizzato sulla massa totale di e-fuels) per voce di spesa — colori coerenti con la Figura 5.24 della tesi</div>
+        <div class="plot" id="chartCOP"></div>
+      </div>
+      <div class="card full">
+        <h3>Cash flow di progetto <span class="badge live">live</span></h3>
+        <div class="note">Operating Cash Flow annuo e Cash Flow Scontato Cumulato (CCF / VAN), 2025–2050</div>
+        <div class="plot" id="chartCF"></div>
+      </div>
+      <div class="card full">
+        <h3>Prezzo medio del SAF secondo il mandato ReFuelEU Aviation <span class="badge live">live</span></h3>
+        <div class="note">Media pesata tra fossile, bio-SAF (HEFA) ed e-SAF secondo le quote minime obbligatorie 2025–2050 (Reg. UE 2023/2405)</div>
+        <div class="plot" id="chartSaf"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+__APP_JS__
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+Metti qui i due file immagine dei loghi, con questi nomi ESATTI:
+
+  politecnico-torino.png
+  sarpom.png
+
+Formato consigliato: PNG con sfondo trasparente, altezza circa 100-150 px.
+Una volta aggiunti, apri (o ricarica) il file eSAF_Modello_Interattivo.html
+e i loghi compariranno automaticamente in alto, accanto al titolo.
