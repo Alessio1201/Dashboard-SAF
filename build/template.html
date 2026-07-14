@@ -105,7 +105,44 @@
   .infoline b{color:var(--text); font-variant-numeric:tabular-nums;}
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+
+  /* ===================================================================================
+     RESPONSIVE / MOBILE — sotto i 1100px i due grafici della riga superiore si impilano;
+     sotto i 900px la barra laterale passa sopra al contenuto principale (non più fissa
+     a lato) così su smartphone/tablet si scorre semplicemente la pagina dall'alto in
+     basso: prima i controlli, poi le KPI, poi i grafici. Sotto i 640px si riducono anche
+     testi, margini e altezza dei grafici per stare comodi su schermi piccoli.
+     =================================================================================== */
   @media (max-width:1100px){ .charts{grid-template-columns:1fr;} }
+
+  @media (max-width:900px){
+    .layout{flex-direction:column;}
+    aside{
+      width:100%; min-width:0; height:auto; max-height:none;
+      position:static; overflow-y:visible;
+      border-right:none; border-bottom:1px solid var(--border);
+    }
+    main{padding:16px 14px 30px;}
+  }
+
+  @media (max-width:640px){
+    body{font-size:13px;}
+    header{padding:16px 16px 12px;}
+    .brandLogos{padding:8px 12px; gap:14px;}
+    .brandLogos .logo{height:36px;}
+    header h1{font-size:17px;}
+    header p{font-size:12.5px;}
+    aside{padding:14px 14px 30px;}
+    main{padding:14px 12px 28px;}
+    .kpis{grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px;}
+    .kpi{padding:11px 12px;}
+    .kpi .num{font-size:16px;}
+    .card{padding:12px 12px 4px;}
+    .group{padding:12px 12px;}
+    .plot{height:280px;}
+    #chartCOP, #chartPrice{height:340px;}
+    .advgrid{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
@@ -113,17 +150,20 @@
 <header>
   <div class="brandRow">
     <div class="brandLogos">
-      <!-- Loghi caricati da file esterni: metti i due file immagine in una cartella chiamata
+      <!-- Loghi caricati da file esterni: metti i tre file immagine in una cartella chiamata
            "loghi" accanto a questo file .html, con questi nomi esatti:
              loghi/politecnico-torino.png
+             loghi/logo-centrale.png   (terzo logo, da sostituire con il file desiderato)
              loghi/sarpom.png
-           Finché i file non ci sono, il logo semplicemente non compare (nessuna icona rotta). -->
+           Finché un file non c'è, il logo semplicemente non compare (nessuna icona rotta). -->
       <img class="logo" src="loghi/politecnico-torino.png" alt="Politecnico di Torino"
+           onerror="this.style.display='none'">
+      <img class="logo" src="loghi/logo-centrale.png" alt="Logo"
            onerror="this.style.display='none'">
       <img class="logo" src="loghi/sarpom.png" alt="Sarpom Srl"
            onerror="this.style.display='none'">
     </div>
-    <div class="brandText">Modello sviluppato da Politecnico di Torino e Sarpom Srl — <span>Alessio Tauro</span></div>
+    <div class="brandText">Modello sviluppato da Politecnico di Torino in collaborazione con Sarpom Srl</div>
   </div>
   <h1>eSAF – Modello Tecno-Economico Interattivo</h1>
   <p>Modifica i parametri a sinistra per ricalcolare in tempo reale il <b>prezzo di break-even del kerosene</b>, il cash flow scontato e il prezzo medio del SAF secondo il mandato ReFuelEU.</p>

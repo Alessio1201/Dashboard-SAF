@@ -1,8 +1,11 @@
-Metti qui i due file immagine dei loghi, con questi nomi ESATTI:
+Metti qui i tre file immagine dei loghi, con questi nomi ESATTI:
 
-  politecnico-torino.png
-  sarpom.png
+  politecnico-torino.png   (già presente)
+  logo-centrale.png        (terzo logo, al centro — sostituisci con il file desiderato)
+  sarpom.png                (già presente)
 
 Formato consigliato: PNG con sfondo trasparente, altezza circa 100-150 px.
-Una volta aggiunti, apri (o ricarica) il file eSAF_Modello_Interattivo.html
-e i loghi compariranno automaticamente in alto, accanto al titolo.
+Una volta aggiunto anche "logo-centrale.png", apri (o ricarica) il file
+eSAF_Modello_Interattivo.html e i tre loghi compariranno automaticamente
+in alto, accanto al titolo, in quest'ordine: Politecnico di Torino, logo
+centrale, Sarpom Srl.
